@@ -1,6 +1,47 @@
 #include "list.h"
+#define LIST_FUNCTIONS_LOG
 
-const int LIST_MAX_SIZE = 15;
+const int LIST_MAX_SIZE = 10;
+
+
+#ifdef LIST_FUNCTIONS_LOG
+static FILE* htmlFilePtr;
+static int htmlImageCount = 0;
+char dotFilename[80] = "logger/result.dot";
+char imageFilename[80] = "logger/output000.svg";
+
+bool initializeLogger(){
+    htmlFilePtr = fopen("listLog.html", "w");
+    if (htmlFilePtr == NULL) {
+        printf("Unable to open listLog.html...\n");
+        return false;
+    }
+    fprintf(htmlFilePtr, "<pre style=\"font-size: 20px\">\n");
+    return true;
+}
+
+void closeLogger(){
+    fprintf(htmlFilePtr, "</pre>\n");
+    fclose(htmlFilePtr);
+}
+#endif
+
+#define LOG_FUNCTION \
+do { \
+    if (htmlFilePtr == NULL) { \
+        printf("htmlFilePtr is uninitialized\n"); \
+        return false; \
+    } \
+    fprintf(htmlFilePtr, " function executed, resulting list:\n"); \
+    if (!createDotFile(list, dotFilename)) return false; \
+    imageFilename[13] = htmlImageCount / 100 + '0'; \
+    imageFilename[14] = htmlImageCount / 10 % 10 + '0'; \
+    imageFilename[15] = htmlImageCount % 10 + '0'; \
+    if (!createSvgFromDot(dotFilename, imageFilename)) return false; \
+    fprintf(htmlFilePtr, "<img src=\"%s\">\n\n\n\n", imageFilename); \
+    ++htmlImageCount; \
+     \
+} while(0); \
 
 struct List {
     ListElem elements[LIST_MAX_SIZE];
@@ -9,14 +50,26 @@ struct List {
     int freeElement;
 };
 
-void initList(List** list){
-    *list = (List*)calloc(1, sizeof(List));
-    (*list)->freeElement = 1;
-    for (int i = 1; i < LIST_MAX_SIZE - 1; ++i) {
-        (*list)->rightPointers[i] = i + 1;
+bool initList(List** listPtr){
+    *listPtr = (List*)calloc(1, sizeof(List));
+    if (*listPtr == NULL) {
+        printf("Unable to calloc\n");
+        return false;
     }
-    (*list)->rightPointers[LIST_MAX_SIZE - 1] = 0;
+    (*listPtr)->freeElement = 1;
+    for (int i = 1; i < LIST_MAX_SIZE - 1; ++i) {
+        (*listPtr)->rightPointers[i] = i + 1;
+    }
+    (*listPtr)->rightPointers[LIST_MAX_SIZE - 1] = 0;
+    #ifdef LIST_FUNCTIONS_LOG
+    List* list = *listPtr;
+    fprintf(htmlFilePtr, "initList");
+    LOG_FUNCTION
+    #endif
+    return true;
 }
+
+
 
 bool pushBack(List* list, ListElem elem){
     if (list->freeElement == 0) {
@@ -35,7 +88,12 @@ bool pushBack(List* list, ListElem elem){
     }
     list->leftPointers[0] = list->freeElement;
     list->freeElement = nextFreeElement;
-    //printf("%s\n", __func__);
+    #ifdef LIST_FUNCTIONS_LOG
+    fprintf(htmlFilePtr, "pushBack(");
+    fprintElement(htmlFilePtr, elem);
+    putc(')', htmlFilePtr);
+    LOG_FUNCTION
+    #endif
     return true;
 }
 
@@ -50,10 +108,17 @@ bool popBack(List* list, ListElem* elem){
     list->leftPointers[0] = list->leftPointers[list->leftPointers[0]];
     if (list->leftPointers[0] == 0) list->rightPointers[0] = 0;
     else list->rightPointers[list->leftPointers[0]] = 0;
+    #ifdef LIST_FUNCTIONS_LOG
+    fprintf(htmlFilePtr, "popBack(0x%p)", elem);
+    LOG_FUNCTION
+    #endif
     return true;
 }
 
 bool insert(List* list, int pos, ListElem elem){
+    #ifdef LIST_FUNCTIONS_LOG
+    int tmp = pos;
+    #endif
     if (list->freeElement == 0) {
         printf("Unable to insert: list is full\n");
         return false;
@@ -71,7 +136,6 @@ bool insert(List* list, int pos, ListElem elem){
             return false;
         }
     }
-    printf("%d\n", index);
     int nextFreeElement = list->rightPointers[list->freeElement];
     list->elements[list->freeElement] = elem;
     list->rightPointers[list->freeElement] = index;
@@ -80,10 +144,19 @@ bool insert(List* list, int pos, ListElem elem){
     else list->rightPointers[0] = list->freeElement;
     list->leftPointers[index] = list->freeElement;
     list->freeElement = nextFreeElement;
+    #ifdef LIST_FUNCTIONS_LOG
+    fprintf(htmlFilePtr, "insert(%d, ", tmp);
+    fprintElement(htmlFilePtr, elem);
+    putc(')', htmlFilePtr);
+    LOG_FUNCTION
+    #endif
     return true;
 }
 
 bool erase(List* list, int pos) {
+    #ifdef LIST_FUNCTIONS_LOG
+    int tmp = pos;
+    #endif
     if (list->rightPointers[0] == 0) {
         printf("Unable to erase: list is empty\n");
         return false;
@@ -110,6 +183,10 @@ bool erase(List* list, int pos) {
         list->rightPointers[index] = list->freeElement;
         list->freeElement = index;
     }
+    #ifdef LIST_FUNCTIONS_LOG
+    fprintf(htmlFilePtr, "erase(%d)", tmp);
+    LOG_FUNCTION
+    #endif
     return true;
 }
 
@@ -148,7 +225,7 @@ bool createDotFile(List* list, const char* outFilename){
     }
     FILE* filePtr = fopen(outFilename, "w");
     if (filePtr == NULL) {
-        printf("Unable to open file\n");
+        printf("Unable to open file: %s\n", outFilename);
         return false;
     }
     //beginning and vertices declaration

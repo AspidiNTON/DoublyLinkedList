@@ -3,6 +3,7 @@ CFLAGS = -c -Wall
 SRC_DIR = source
 INC_DIR = include
 OBJ_DIR = object
+LOG_DIR = logger
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
 INCLUDES := $(wildcard $(INC_DIR)/*.h)
 OBJECTS := $(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
@@ -13,11 +14,14 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@
 
-$(OBJECTS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp $(OBJ_DIR)
+$(OBJECTS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp $(OBJ_DIR) $(LOG_DIR)
 	$(CC) $(CFLAGS) -I$(INC_DIR) $< -o $@
 
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
+	
+$(LOG_DIR):
+	mkdir $(LOG_DIR)
 
 #clean:
 #	rm -r .\$(OBJ_DIR)

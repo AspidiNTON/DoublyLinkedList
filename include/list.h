@@ -8,7 +8,7 @@ typedef int ListElem;
 
 struct List;
 
-void initList(List** list);
+bool initList(List** list);
 
 bool pushBack(List* list, ListElem elem);
 
@@ -29,6 +29,10 @@ void consoleDump(List* list);
 bool createDotFile(List* list, const char* outFilename);
 
 bool createSvgFromDot(const char* inFilename, const char* outFilename);
+
+bool initializeLogger();
+
+void closeLogger();
 
 
 #endif

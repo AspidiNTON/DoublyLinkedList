@@ -13,6 +13,7 @@ void fprintElement(FILE* filePtr, ListElem elem){
 
 int main(){
     List* list = {};
+    initializeLogger();
     initList(&list);
 
     pushBack(list, 5);
@@ -33,18 +34,9 @@ int main(){
     popBack(list, NULL);
     pushBack(list, 324);
     pushBack(list, 1488);
-    
     insert(list, 3, 4444);
-
-    printList(list);
-    consoleDump(list);
-
-
     erase(list, 4);
-    printList(list);
-    consoleDump(list);
-    
-    createDotFile(list, "result.dot");
-    createSvgFromDot("result.dot", "output.svg");
+
+    closeLogger();
     return 0;
 }
