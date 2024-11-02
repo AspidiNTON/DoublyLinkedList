@@ -4,6 +4,12 @@ void printElement(ListElem elem){
     printf("%d", elem);
 }
 
+void fprintElement(FILE* filePtr, ListElem elem){
+    if (filePtr == NULL) {
+        printf("File nullptr recieved\n");
+    } else fprintf(filePtr, "%d", elem);
+}
+
 
 int main(){
     List* list = {};
@@ -20,12 +26,11 @@ int main(){
     pushBack(list, 666666);
     pushBack(list, 324);
     pushBack(list, 1488);
-    int xdd;
-    popBack(list, &xdd);
-    popBack(list, &xdd);
-    popBack(list, &xdd);
-    popBack(list, &xdd);
-    popBack(list, &xdd);
+    popBack(list, NULL);
+    popBack(list, NULL);
+    popBack(list, NULL);
+    popBack(list, NULL);
+    popBack(list, NULL);
     pushBack(list, 324);
     pushBack(list, 1488);
     
@@ -36,15 +41,10 @@ int main(){
 
 
     erase(list, 4);
-
-    
-    pushBack(list, 16);
-    pushBack(list, 226);
-    pushBack(list, 655);
-    pushBack(list, 90);
-    pushBack(list, 14);
-    pushBack(list, 32);
     printList(list);
     consoleDump(list);
+    
+    createDotFile(list, "result.dot");
+    createSvgFromDot("result.dot", "output.svg");
     return 0;
 }

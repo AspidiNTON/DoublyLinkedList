@@ -20,9 +20,15 @@ bool erase(List* list, int pos);
 
 void printElement(ListElem elem);
 
+void fprintElement(FILE* filePtr, ListElem elem);
+
 void printList(List* list);
 
 void consoleDump(List* list);
+
+bool createDotFile(List* list, const char* outFilename);
+
+bool createSvgFromDot(const char* inFilename, const char* outFilename);
 
 
 #endif
