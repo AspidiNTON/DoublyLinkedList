@@ -3,6 +3,7 @@
 
 const int LIST_MAX_SIZE = 10;
 
+#define printErr(s, ...) fprintf(stderr, "\033[0;31m" s "\033[1;0m", ## __VA_ARGS__)
 
 #ifdef LIST_FUNCTIONS_LOG
 static FILE* htmlFilePtr;
@@ -13,7 +14,7 @@ char imageFilename[80] = "logger/output000.svg";
 bool initializeLogger(){
     htmlFilePtr = fopen("listLog.html", "w");
     if (htmlFilePtr == NULL) {
-        printf("Unable to open listLog.html...\n");
+        printErr("Unable to open listLog.html...\n");
         return false;
     }
     fprintf(htmlFilePtr, "<pre style=\"font-size: 20px\">\n");
@@ -29,7 +30,7 @@ void closeLogger(){
 #define LOG_FUNCTION \
 do { \
     if (htmlFilePtr == NULL) { \
-        printf("htmlFilePtr is uninitialized\n"); \
+        printErr("htmlFilePtr is uninitialized\n"); \
         return false; \
     } \
     fprintf(htmlFilePtr, " function executed, resulting list:\n"); \
@@ -53,7 +54,7 @@ struct List {
 bool initList(List** listPtr){
     *listPtr = (List*)calloc(1, sizeof(List));
     if (*listPtr == NULL) {
-        printf("Unable to calloc\n");
+        printErr("Unable to calloc\n");
         return false;
     }
     (*listPtr)->freeElement = 1;
@@ -73,7 +74,7 @@ bool initList(List** listPtr){
 
 bool pushBack(List* list, ListElem elem){
     if (list->freeElement == 0) {
-        printf("Unable to push: list is full\n");
+        printErr("Unable to push: list is full\n");
         return false;
     }
     int nextFreeElement = list->rightPointers[list->freeElement];
@@ -99,7 +100,7 @@ bool pushBack(List* list, ListElem elem){
 
 bool popBack(List* list, ListElem* elem){
     if (list->leftPointers[0] == 0) {
-        printf("Unable to pop: list is empty\n");
+        printErr("Unable to pop: list is empty\n");
         return false;
     }
     if (elem != NULL) *elem = list->elements[list->leftPointers[0]];
@@ -120,7 +121,7 @@ bool insert(List* list, int pos, ListElem elem){
     int tmp = pos;
     #endif
     if (list->freeElement == 0) {
-        printf("Unable to insert: list is full\n");
+        printErr("Unable to insert: list is full\n");
         return false;
     }
     int index = list->rightPointers[0];
@@ -132,7 +133,7 @@ bool insert(List* list, int pos, ListElem elem){
         if (pos == 0) {
             return pushBack(list, elem);
         } else {
-            printf("List index out of range\n");
+            printErr("List index out of range\n");
             return false;
         }
     }
@@ -158,7 +159,7 @@ bool erase(List* list, int pos) {
     int tmp = pos;
     #endif
     if (list->rightPointers[0] == 0) {
-        printf("Unable to erase: list is empty\n");
+        printErr("Unable to erase: list is empty\n");
         return false;
     }
     int index = list->rightPointers[0];
@@ -167,7 +168,7 @@ bool erase(List* list, int pos) {
         --pos;
     }
     if (index == 0) {
-        printf("List index out of range\n");
+        printErr("List index out of range\n");
         return false;
     }
     if (list->rightPointers[0] == list->leftPointers[0]) {
@@ -220,12 +221,12 @@ void consoleDump(List* list){
 
 bool createDotFile(List* list, const char* outFilename){
     if (outFilename == NULL) {
-        printf("Filename nullptr recieved\n");
+        printErr("Filename nullptr recieved\n");
         return false;
     }
     FILE* filePtr = fopen(outFilename, "w");
     if (filePtr == NULL) {
-        printf("Unable to open file: %s\n", outFilename);
+        printErr("Unable to open file: %s\n", outFilename);
         return false;
     }
     //beginning and vertices declaration
@@ -264,13 +265,13 @@ bool createDotFile(List* list, const char* outFilename){
 
 bool createSvgFromDot(const char* inFilename, const char* outFilename){
     if (inFilename == NULL || outFilename == NULL) {
-        printf("Filename nullptr recieved\n");
+        printErr("Filename nullptr recieved\n");
         return false;
     }
     char command[100] = {};
     sprintf(command, "dot -Tsvg %s -o %s", inFilename, outFilename);
     if (system(command) != 0) {
-        printf("Image creation command failed\n");
+        printErr("Image creation command failed\n");
         return false;
     }
     return true;
