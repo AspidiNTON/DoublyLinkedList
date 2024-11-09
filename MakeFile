@@ -23,5 +23,8 @@ $(OBJ_DIR):
 $(LOG_DIR):
 	mkdir $(LOG_DIR)
 
-#clean:
-#	rm -r .\$(OBJ_DIR)
+clean:
+	@del $(OBJ_DIR)\* /F /Q
+	@del $(LOG_DIR)\* /F /Q
+	@del $(EXECUTABLE).exe
+	@del *.html

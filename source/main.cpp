@@ -38,5 +38,6 @@ int main(){
     erase(list, 4);
 
     closeLogger();
+    destroyList(&list);
     return 0;
 }

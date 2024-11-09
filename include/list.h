@@ -10,6 +10,8 @@ struct List;
 
 bool initList(List** list);
 
+bool destroyList(List** list);
+
 bool pushBack(List* list, ListElem elem);
 
 bool popBack(List* list, ListElem* elem);

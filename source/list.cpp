@@ -70,7 +70,11 @@ bool initList(List** listPtr){
     return true;
 }
 
-
+bool destroyList(List** list){
+    free(*list);
+    *list = NULL;
+    return true;
+}
 
 bool pushBack(List* list, ListElem elem){
     if (list->freeElement == 0) {
